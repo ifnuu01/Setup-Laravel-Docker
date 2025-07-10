@@ -425,6 +425,6 @@ cd new-project
 .\docker.ps1 setup
 ```
 
-Jika bingung di langkah-langkah ini, bisa lihat contoh di folder `laravel-docker-template` yang sudah disiapkan.
+Jika bingung dilangkah-langkah ini, bisa lihat contoh di folder `laravel-docker-template` yang sudah disiapkan.
 
 **Selesai!** Project baru sudah punya database sendiri dan berjalan di port berbeda
