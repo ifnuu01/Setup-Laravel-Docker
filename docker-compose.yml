@@ -9,6 +9,10 @@ services:
     working_dir: /var/www
     volumes:
       - ./:/var/www
+      # Optimasi: gunakan named volumes untuk folder yang sering diakses
+      - vendor_volume:/var/www/vendor
+      - node_modules_volume:/var/www/node_modules
+      - storage_volume:/var/www/storage
     networks:
       - laravel
 
@@ -61,6 +65,16 @@ services:
     networks:
       - laravel
 
+  # Redis for caching
+  redis:
+    image: redis:alpine
+    container_name: laravel-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - laravel
+
 # Docker Networks
 networks:
   laravel:
@@ -69,4 +83,10 @@ networks:
 # Volumes
 volumes:
   dbdata:
+    driver: local
+  vendor_volume:
+    driver: local
+  node_modules_volume:
+    driver: local
+  storage_volume:
     driver: local

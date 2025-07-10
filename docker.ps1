@@ -48,7 +48,7 @@ function Invoke-Composer {
 
 function Initialize-Setup {
     Write-Host "Setting up Laravel application..." -ForegroundColor Green
-    docker-compose up -d --build
+    docker-compose up -d
     Write-Host "Installing dependencies..." -ForegroundColor Yellow
     docker-compose exec app composer install
     Write-Host "Running migrations..." -ForegroundColor Yellow
