@@ -1,19 +1,20 @@
 version: "3.8"
 
 services:
-  mysql: mysql:8.0 
-  environment:
-    MYSQL_ROOT_PASSWORD: root
-    MYSQL_DATABASE: mydb
-    MYSQL_USER: user
-    MYSQL_PASSWORD: secret
-  ports:
-    - "3306:3306"
-  volumes:
-    - mysql:/var/lib/mysql
-  healthcheck:
-    test: ["CMD", "mysqladmin", "ping", "--silent"]
-  restart: unless-stopped
+  mysql:
+    mysql: mysql:8.0 
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mydb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: secret
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "--silent"]
+    restart: unless-stopped
   
   phpmyadmin:
     image: phpmyadmin:latest
