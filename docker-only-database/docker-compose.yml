@@ -5,11 +5,11 @@ services:
     image: mysql:8.0 
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: mydb
-      MYSQL_USER: user
+      MYSQL_DATABASE: mydb # bisa diubah nama databasenya
+      MYSQL_USER: user 
       MYSQL_PASSWORD: secret
     ports:
-      - "3306:3306"
+      - "3306:3306" # jika port sdh terpakai ganti jadi yg tidak terpakai ex: 3307:3306 
     volumes:
       - mysql:/var/lib/mysql
     healthcheck:
@@ -19,7 +19,7 @@ services:
   phpmyadmin:
     image: phpmyadmin:5.2.2-apache
     ports:
-      - 8080:80
+      - 8080:80 # jika port sdh terpakai ganti jadi yg tidak terpakai ex: 8081:80
     environment:
       PMA_HOST: mysql
       PMA_USER: user
