@@ -23,7 +23,7 @@ services:
     environment:
       PMA_HOST: mysql
       PMA_USER: user
-      PMA_PASSWORD: changeme
+      PMA_PASSWORD: secret
     depends_on:
       - mysql
     restart: unless-stopped
