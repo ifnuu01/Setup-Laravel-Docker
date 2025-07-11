@@ -1,595 +1,308 @@
-# 🚀 Laravel + Docker Setup untuk Windows
+# Environment Pengembangan Laravel Docker
 
-Halo! Ini adalah setup lengkap untuk menjalankan Laravel dengan Docker di Windows. Gak perlu pusing install PHP, MySQL, dan Nginx satu-satu - semuanya udah dikemas rapi dalam Docker containers.
+Environment pengembangan Docker yang lengkap untuk aplikasi Laravel dengan semua layanan yang diperlukan termasuk Nginx, MySQL, Redis, phpMyAdmin, MailHog, dan pemrosesan background job.
 
-## 📋 Yang Perlu Disiapkan Dulu
+## 🚀 Layanan yang Tersedia
 
-Pastikan udah install ini semua ya:
+- **Laravel App** - PHP 8.2-FPM dengan framework Laravel
+- **Nginx** - Web server proxy untuk melayani aplikasi
+- **MySQL 8** - Database utama
+- **Redis** - Penyimpanan cache dan session
+- **phpMyAdmin** - Administrasi MySQL berbasis web
+- **MailHog** - Tool untuk testing email
+- **Queue Worker** - Pemrosesan antrian Laravel
+- **Task Scheduler** - Penjadwal tugas cron Laravel
 
-- ✅ **Docker Desktop for Windows** - [Download disini](https://www.docker.com/products/docker-desktop)
-- ✅ **Git** - [Download disini](https://git-scm.com/download/win)
-- ✅ **Composer** - [Download disini](https://getcomposer.org/download/) (untuk bikin project Laravel baru)
-- ✅ **PowerShell** - Biasanya udah ada di Windows
+## 📋 Persyaratan
 
-## 🎯 Setup Project Laravel Baru (Step by Step)
+- Docker Desktop terinstall dan berjalan
+- Docker Compose v3.8 atau lebih tinggi
+- Git (untuk cloning repository)
 
-### 1. Bikin Project Laravel Baru
+## 🛠️ Instalasi & Setup
 
-```powershell
-# Bikin project Laravel baru
-composer create-project laravel/laravel nama-project-kamu
-cd nama-project-kamu
+### 1. Clone atau Setup Proyek Laravel Anda
+
+```bash
+# Jika Anda belum memiliki proyek Laravel, buat satu di folder src
+git clone your-laravel-project.git src
+# ATAU buat proyek Laravel baru
+mkdir src
+cd src
+composer create-project laravel/laravel .
 ```
 
-### 2. Copy Semua File Docker
+### 2. Konfigurasi Environment
 
-Copy semua file dari repository ini ke folder project Laravel kamu:
-
-```
-📁 nama-project-kamu/
-├── 📄 Dockerfile                    # ← Copy ini
-├── 📄 docker-compose.yml           # ← Copy ini
-├── 📄 .dockerignore                # ← Copy ini
-├── 📄 docker.ps1                   # ← Copy ini
-├── 📄 optimize.ps1                 # ← Copy ini
-└── 📁 docker-compose/              # ← Copy folder ini
-    ├── 📁 nginx/
-    │   └── 📄 default.conf
-    └── 📁 mysql/
-        └── 📄 my.cnf
-```
-
-### 3. Setting File .env
-
-Edit file `.env` di project Laravel kamu, ganti bagian database jadi begini:
+Buat file `.env` di proyek Laravel Anda (`src/.env`) dengan konfigurasi database berikut:
 
 ```env
 DB_CONNECTION=mysql
 DB_HOST=db
 DB_PORT=3306
-DB_DATABASE=app
+DB_DATABASE=laravel
 DB_USERNAME=laravel
 DB_PASSWORD=secret
+
+REDIS_HOST=redis
+REDIS_PASSWORD=null
+REDIS_PORT=6379
+
+MAIL_MAILER=smtp
+MAIL_HOST=mailhog
+MAIL_PORT=1025
+MAIL_USERNAME=null
+MAIL_PASSWORD=null
+MAIL_ENCRYPTION=null
 ```
 
-### 4. Jalankan Setup
+### 3. Build dan Jalankan Environment
 
-```powershell
-# Kasih permission dulu buat PowerShell script
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-
-# Setup lengkap (cukup sekali aja)
-.\docker.ps1 setup
-```
-
-**Tunggu sampai selesai** (biasanya 2-5 menit tergantung internet), nanti bakal otomatis:
-
-- Download semua Docker images
-- Install dependencies Laravel
-- Setup database
-- Jalankan migration
-
-### 5. Buka Browser
-
-Kalau udah selesai setup, buka:
-
-- 🌐 **Laravel App**: http://localhost:8000
-- 🗄️ **phpMyAdmin**: http://localhost:8080
-
-## 📁 Apa Aja Yang Ada Di Setup Ini?
-
-```
-📁 project-laravel-kamu/
-├── 📄 Dockerfile                    # Recipe untuk bikin PHP container
-├── 📄 docker-compose.yml           # Orchestrasi semua services
-├── 📄 .dockerignore                # File yang diabaikan saat build
-├── 📄 docker.ps1                   # Script helper buat Windows
-├── 📄 optimize.ps1                 # Script optimasi performa
-├── 📁 docker-compose/
-│   ├── 📁 nginx/
-│   │   └── 📄 default.conf         # Konfigurasi web server
-│   └── 📁 mysql/
-│       └── 📄 my.cnf               # Konfigurasi database
-└── 📁 laravel-files... (project Laravel kamu)
-```
-
-## 🎛️ Services Yang Jalan
-
-| Service       | Port | URL                   | Fungsi                |
-| ------------- | ---- | --------------------- | --------------------- |
-| 🌐 Laravel    | 8000 | http://localhost:8000 | Aplikasi web kamu     |
-| 🗄️ phpMyAdmin | 8080 | http://localhost:8080 | Kelola database       |
-| 🐬 MySQL      | 3306 | localhost:3306        | Database server       |
-| 🔴 Redis      | 6379 | localhost:6379        | Cache & session store |
-
-## 🔑 Login Database
-
-**Untuk Laravel (.env):**
-
-```env
-DB_HOST=db
-DB_DATABASE=app
-DB_USERNAME=laravel
-DB_PASSWORD=secret
-```
-
-**Untuk phpMyAdmin atau tools eksternal:**
-
-- 🌐 **Host**: localhost
-- 🗄️ **Database**: app
-- 👤 **Username**: laravel
-- 🔐 **Password**: secret
-- 🔑 **Root Password**: rootpassword
-
-## ⚡ Command Yang Sering Dipake
-
-### Jalanin Environment
-
-```powershell
-# Start semua container
-.\docker.ps1 start
-
-# Stop semua container
-.\docker.ps1 stop
-
-# Restart semua container
-.\docker.ps1 restart
-
-# Liat logs real-time
-.\docker.ps1 logs
-```
-
-### Laravel Commands
-
-```powershell
-# Masuk ke shell container Laravel
-.\docker.ps1 shell
-
-# Jalanin artisan commands
-.\docker.ps1 artisan migrate
-.\docker.ps1 artisan make:model User
-.\docker.ps1 artisan tinker
-.\docker.ps1 artisan serve # gak perlu ini, udah jalan otomatis
-
-# Jalanin composer commands
-.\docker.ps1 composer install
-.\docker.ps1 composer require spatie/laravel-permission
-.\docker.ps1 composer dump-autoload
-```
-
-### Setup Ulang (Kalau Ada Masalah)
-
-```powershell
-# Setup lengkap dari awal
-.\docker.ps1 setup
-
-# Optimasi performa
-.\optimize.ps1 optimize
-
-# Reset named volumes (kalau vendor error)
-.\optimize.ps1 reset
-```
-
-## 🔧 Manual Commands (Kalau Mau Pake Docker Langsung)
-
-Kalau mau pake command Docker langsung tanpa script helper:
-
-```powershell
-# Start semua services
-docker-compose up -d
-
-# Stop semua services
-docker-compose down
-
-# Build ulang dan start
+```bash
+# Build dan jalankan semua container
 docker-compose up -d --build
 
-# Jalanin artisan
-docker-compose exec app php artisan migrate
+# Atau jalankan di foreground untuk melihat logs
+docker-compose up --build
+```
 
-# Jalanin composer
+### 4. Install Dependencies Laravel
+
+```bash
+# Install dependencies Composer
 docker-compose exec app composer install
 
-# Masuk ke shell container
+# Generate application key
+docker-compose exec app php artisan key:generate
+
+# Jalankan migrasi database
+docker-compose exec app php artisan migrate
+
+# Install dependencies NPM (jika diperlukan)
+docker-compose exec app npm install
+```
+
+## 🌐 Titik Akses
+
+| Layanan              | URL                   | Kredensial                                                                                |
+| -------------------- | --------------------- | ----------------------------------------------------------------------------------------- |
+| **Aplikasi Laravel** | http://localhost:8000 | -                                                                                         |
+| **phpMyAdmin**       | http://localhost:8081 | Username: `laravel`<br>Password: `secret`<br>ATAU<br>Username: `root`<br>Password: `root` |
+| **MailHog**          | http://localhost:8025 | -                                                                                         |
+| **Database MySQL**   | localhost:3306        | Username: `laravel`<br>Password: `secret`<br>Database: `laravel`                          |
+| **Redis**            | localhost:6379        | -                                                                                         |
+
+## 📁 Struktur Proyek
+
+```
+laravel-docker/
+├── docker-compose.yml          # Konfigurasi layanan Docker
+├── Dockerfile                  # Konfigurasi container PHP-FPM
+├── nginx/
+│   └── default.conf           # Konfigurasi virtual host Nginx
+├── src/                       # Kode aplikasi Laravel Anda
+└── README.md                  # Dokumentasi ini
+```
+
+## 🔧 Perintah Umum
+
+### Operasi Docker
+
+```bash
+# Jalankan semua layanan
+docker-compose up -d
+
+# Hentikan semua layanan
+docker-compose down
+
+# Lihat logs
+docker-compose logs -f
+
+# Lihat logs untuk layanan tertentu
+docker-compose logs -f app
+
+# Rebuild containers
+docker-compose up -d --build
+
+# Hapus semuanya (containers, networks, volumes)
+docker-compose down -v --remove-orphans
+```
+
+### Operasi Laravel
+
+```bash
+# Akses shell container Laravel
 docker-compose exec app bash
 
-# Liat logs specific service
-docker-compose logs -f app
-docker-compose logs -f db
+# Jalankan perintah Artisan
+docker-compose exec app php artisan migrate
+docker-compose exec app php artisan make:controller ExampleController
+docker-compose exec app php artisan cache:clear
+
+# Install package
+docker-compose exec app composer require package-name
+
+# Jalankan tests
+docker-compose exec app php artisan test
 ```
+
+### Operasi Database
+
+```bash
+# Akses shell MySQL
+docker-compose exec db mysql -u laravel -p
+
+# Import database dump
+docker-compose exec -T db mysql -u laravel -p laravel < database.sql
+
+# Buat backup database
+docker-compose exec db mysqldump -u laravel -p laravel > backup.sql
+```
+
+## 🔍 Detail Layanan
+
+### Container PHP-FPM (app)
+
+- **Base Image**: php:8.2-fpm
+- **Extensions**: PDO MySQL, mbstring, zip, exif, pcntl, bcmath, gd
+- **Tools**: Composer, cron, supervisor
+- **Volume**: `./src:/var/www/html`
+
+### Container Nginx
+
+- **Base Image**: nginx:alpine
+- **Port**: 8000 → 80
+- **Konfigurasi**: Virtual host khusus untuk Laravel
+
+### Container MySQL
+
+- **Base Image**: mysql:8
+- **Port**: 3306
+- **Database**: laravel
+- **User**: laravel / secret
+- **Root Password**: root
+
+### Container Redis
+
+- **Base Image**: redis:alpine
+- **Port**: 6379
+
+### Queue Worker
+
+- Secara otomatis memproses job antrian Laravel
+- Menjalankan `php artisan queue:work` secara terus-menerus
+
+### Task Scheduler
+
+- Menjalankan tugas terjadwal Laravel setiap menit
+- Mengeksekusi `php artisan schedule:run`
 
 ## 🚨 Troubleshooting
 
-### 🔴 Port Udah Dipake
+### Masalah Umum
 
-Kalau ada error "port already in use", edit `docker-compose.yml`:
+**Container tidak mau start:**
 
-```yaml
-# Ganti port yang bentrok
-services:
-  webserver:
-    ports:
-      - "8001:80" # Ganti dari 8000 ke 8001
+```bash
+# Cek logs container
+docker-compose logs app
 
-  phpmyadmin:
-    ports:
-      - "8081:80" # Ganti dari 8080 ke 8081
-
-  db:
-    ports:
-      - "3307:3306" # Ganti dari 3306 ke 3307
+# Cek apakah port sudah digunakan
+netstat -tulpn | grep :8000
 ```
 
-### 🔴 Permission Error
+**Masalah koneksi database:**
 
-```powershell
-# Fix permission issues
-docker-compose exec app chown -R www-data:www-data /var/www
-docker-compose exec app chmod -R 755 /var/www/storage
-```
-
-### 🔴 Database Connection Error
-
-1. **Pastikan MySQL container udah jalan**:
-
-   ```powershell
-   docker-compose ps
-   ```
-
-2. **Tunggu MySQL ready** (biasanya 30-60 detik pertama kali):
-
-   ```powershell
-   docker-compose logs db
-   # Tunggu sampai ada log "ready for connections"
-   ```
-
-3. **Cek kredensial di .env** sama dengan docker-compose.yml
-
-### 🔴 Vendor Folder Error
-
-```powershell
-# Reset named volumes
-.\optimize.ps1 reset
-
-# Atau manual:
-docker-compose down
-docker volume prune -f
-docker-compose up -d --build
-.\docker.ps1 composer install
-```
-
-### 🔴 Performance Lambat
-
-```powershell
-# Optimasi Laravel
-.\optimize.ps1 optimize
-
-# Atau manual:
-.\docker.ps1 artisan config:cache
-.\docker.ps1 artisan route:cache
-.\docker.ps1 artisan view:cache
-.\docker.ps1 composer dump-autoload --optimize
-```
-
-## 📦 Yang Udah Terinstall
-
-### 🐘 PHP Extensions
-
-- `pdo_mysql` - Database MySQL
-- `mbstring` - String handling
-- `exif` - Image metadata
-- `pcntl` - Process control
-- `bcmath` - Math calculations
-- `gd` - Image processing
-- `opcache` - Performance optimization
-
-### 🛠️ Development Tools
-
-- **Composer** - PHP package manager
-- **Node.js & npm** - Frontend dependencies
-- **Git** - Version control
-
-### 🏗️ Services
-
-- **PHP 8.2 FPM** - PHP processor
-- **Nginx (Alpine)** - Web server
-- **MySQL 8.0** - Database
-- **phpMyAdmin** - Database GUI
-- **Redis (Alpine)** - Cache & sessions
-
-## 🎨 Customization (Sesuain Kebutuhan)
-
-### 🔄 Ganti Versi PHP
-
-Edit `Dockerfile`:
-
-```dockerfile
-FROM php:8.3-fpm  # Ganti dari 8.2 ke 8.3
-```
-
-### ➕ Tambah PHP Extension
-
-Edit `Dockerfile`:
-
-```dockerfile
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd redis imagick
-```
-
-### 🔌 Ganti Port
-
-Edit `docker-compose.yml`:
-
-```yaml
-services:
-  webserver:
-    ports:
-      - "8001:80" # Laravel
-  phpmyadmin:
-    ports:
-      - "8081:80" # phpMyAdmin
-  db:
-    ports:
-      - "3307:3306" # MySQL
-```
-
-### 🗄️ Ganti Database Credentials
-
-Edit `docker-compose.yml`:
-
-```yaml
-environment:
-  MYSQL_DATABASE: project_baru
-  MYSQL_USER: user_baru
-  MYSQL_PASSWORD: password_baru
-```
-
-Dan jangan lupa update `.env`:
-
-```env
-DB_DATABASE=project_baru
-DB_USERNAME=user_baru
-DB_PASSWORD=password_baru
-```
-
-## 📚 Multiple Projects (Kelola Banyak Project)
-
-### 🎯 Scenario 1: Database Terpisah (RECOMMENDED)
-
-Setiap project punya database sendiri - ini yang paling aman dan gampang.
-
-**Langkah untuk project baru:**
-
-1. **Copy semua file Docker** ke project baru
-2. **Edit docker-compose.yml** - ganti database name:
-   ```yaml
-   environment:
-     MYSQL_DATABASE: project_kedua_db # Ganti nama
-   ```
-3. **Ganti port** kalau project lama masih jalan:
-   ```yaml
-   ports:
-     - "8001:80" # Laravel (8000 -> 8001)
-     - "8081:80" # phpMyAdmin (8080 -> 8081)
-     - "3307:3306" # MySQL (3306 -> 3307)
-   ```
-4. **Edit .env** project baru:
-   ```env
-   DB_DATABASE=project_kedua_db
-   ```
-5. **Jalanin setup**:
-   ```powershell
-   .\docker.ps1 setup
-   ```
-
-**Contoh struktur:**
-
-```
-📁 D:\projects\
-├── 📁 notes-api\               # Project 1
-│   ├── 📄 docker-compose.yml  # Port 8000, DB: notes_db
-│   └── ...
-├── 📁 ecommerce\               # Project 2
-│   ├── 📄 docker-compose.yml  # Port 8001, DB: ecommerce_db
-│   └── ...
-└── 📁 blog\                   # Project 3
-    ├── 📄 docker-compose.yml  # Port 8002, DB: blog_db
-    └── ...
-```
-
-### 🌐 Scenario 2: Share MySQL Container (ADVANCED)
-
-Kalau mau semua project pake MySQL yang sama (agak ribet tapi bisa):
-
-**Setup MySQL Global:**
-
-```yaml
-# docker-compose-mysql.yml (file terpisah)
-services:
-  mysql-global:
-    image: mysql:8.0
-    container_name: mysql-global
-    ports:
-      - "3306:3306"
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-    volumes:
-      - mysql_global_data:/var/lib/mysql
-    networks:
-      - shared-network
-
-networks:
-  shared-network:
-    external: true
-
-volumes:
-  mysql_global_data:
-```
-
-**Setup:**
-
-```powershell
-# 1. Buat network global
-docker network create shared-network
-
-# 2. Start MySQL global
-docker-compose -f docker-compose-mysql.yml up -d
-
-# 3. Bikin database per project
-docker exec mysql-global mysql -uroot -prootpassword -e "CREATE DATABASE project1_db;"
-docker exec mysql-global mysql -uroot -prootpassword -e "CREATE DATABASE project2_db;"
-```
-
-### 💻 Scenario 3: Pake MySQL Yang Udah Ada di Windows
-
-Kalau udah punya MySQL terinstall di Windows:
-
-**Edit .env:**
-
-```env
-DB_HOST=host.docker.internal  # Akses localhost dari container
-DB_PORT=3306
-DB_DATABASE=project_db
-DB_USERNAME=root
-DB_PASSWORD=mysql_password_kamu
-```
-
-**Hapus service MySQL dari docker-compose.yml:**
-
-```yaml
-services:
-  app:
-    # ... config app
-  webserver:
-    # ... config nginx
-  # Hapus bagian db dan phpmyadmin
-```
-
-## 💡 Tips & Trik
-
-### ⚡ Performance Tips
-
-```powershell
-# Optimasi Laravel cache
-.\optimize.ps1 optimize
-
-# Reset kalau ada issue dengan vendor/
-.\optimize.ps1 reset
-
-# Install dependencies aja
-.\optimize.ps1 install
-```
-
-### 🔍 Debug Tips
-
-```powershell
-# Liat logs real-time
-.\docker.ps1 logs
-
-# Liat logs specific service
-docker-compose logs -f app
-docker-compose logs -f db
-docker-compose logs -f webserver
-
-# Check status semua container
+```bash
+# Pastikan container DB berjalan
 docker-compose ps
 
-# Masuk ke container buat debug
-.\docker.ps1 shell
+# Cek logs database
+docker-compose logs db
+
+# Verifikasi konfigurasi .env Laravel
+docker-compose exec app cat .env | grep DB_
 ```
 
-### 🏃‍♂️ Development Workflow
+**Masalah permission:**
 
-```powershell
-# 1. Start environment
-.\docker.ps1 start
-
-# 2. Buat migration/model
-.\docker.ps1 artisan make:migration create_posts_table
-.\docker.ps1 artisan make:model Post
-
-# 3. Jalanin migration
-.\docker.ps1 artisan migrate
-
-# 4. Install package baru
-.\docker.ps1 composer require spatie/laravel-permission
-
-# 5. Clear cache kalau perlu
-.\docker.ps1 artisan config:clear
+```bash
+# Perbaiki permission Laravel storage
+docker-compose exec app chown -R www-data:www-data storage bootstrap/cache
+docker-compose exec app chmod -R 775 storage bootstrap/cache
 ```
 
-## 📋 Next Steps Checklist
+**Masalah Composer/NPM:**
 
-1. ✅ Setup Docker environment (`.\docker.ps1 setup`)
-2. ✅ Test buka http://localhost:8000
-3. ✅ Test buka phpMyAdmin http://localhost:8080
-4. ✅ Run migration pertama (`.\docker.ps1 artisan migrate`)
-5. 🔄 Mulai develop aplikasi kamu
-6. 🔄 Setup authentication (`.\docker.ps1 artisan make:auth`)
-7. 🔄 Install packages yang dibutuhin
-8. 🔄 Setup CI/CD pipeline
-9. 🔄 Deploy ke production
+```bash
+# Clear cache Composer
+docker-compose exec app composer clear-cache
 
-## 🌟 Features Keren Yang Udah Ada
+# Install dependencies
+docker-compose exec app composer install --no-dev --optimize-autoloader
+```
 
-### 🚀 Performance Optimizations
+### Perintah Berguna untuk Debugging
 
-- **OpCache** enabled untuk PHP
-- **Gzip compression** di Nginx
-- **Static file caching** (js, css, images)
-- **Named volumes** untuk vendor/ dan node_modules/
-- **FastCGI optimizations**
+```bash
+# Cek status container
+docker-compose ps
 
-### 🔒 Security Features
+# Inspeksi container
+docker-compose exec app ls -la /var/www/html
 
-- **Security headers** di Nginx
-- **Non-root user** di container
-- **Isolated networks**
-- **Environment variables** untuk credentials
+# Cek konfigurasi PHP
+docker-compose exec app php -m
 
-### 🛠️ Development Tools
+# Test koneksi database
+docker-compose exec app php artisan tinker
+# Kemudian jalankan: DB::connection()->getPdo();
+```
 
-- **Hot reload** - file changes langsung kedetect
-- **Error logging** - semua error masuk ke logs
-- **Database GUI** - phpMyAdmin untuk manage DB
-- **Redis support** - buat cache dan sessions
+## 🔄 Alur Kerja Pengembangan
 
-## 📚 Useful Links & Resources
+1. **Buat perubahan kode** di direktori `src/`
+2. **Perubahan otomatis tercermin** karena volume mounting
+3. **Jalankan migrations/seeders** jika diperlukan:
+   ```bash
+   docker-compose exec app php artisan migrate:fresh --seed
+   ```
+4. **Monitor logs** untuk masalah apapun:
+   ```bash
+   docker-compose logs -f app nginx
+   ```
 
-### 📖 Documentation
+## 📦 Menambahkan Layanan Baru
 
-- [Laravel Documentation](https://laravel.com/docs) - Official Laravel docs
-- [Docker Documentation](https://docs.docker.com/) - Learn more about Docker
-- [Docker Compose Reference](https://docs.docker.com/compose/) - Compose file reference
+Untuk menambahkan layanan baru, edit `docker-compose.yml`:
 
-### 🎥 Video Tutorials (Bahasa Indonesia)
+```yaml
+elasticsearch:
+  image: elasticsearch:7.14.0
+  container_name: laravel-elasticsearch
+  environment:
+    - discovery.type=single-node
+  ports:
+    - "9200:9200"
+  networks:
+    - app-network
+```
 
-- [Laravel Docker Series - Parsinta](https://parsinta.com)
-- [Docker untuk Laravel - BuildWith Angga](https://buildwithangga.com)
+## 🔒 Pertimbangan Production
 
-### 🛠️ Tools Yang Berguna
+Setup ini dirancang untuk pengembangan. Untuk production:
 
-- [Laravel Debugbar](https://github.com/barryvdh/laravel-debugbar) - Debug toolbar
-- [Laravel Telescope](https://laravel.com/docs/telescope) - Debug assistant
-- [Laravel IDE Helper](https://github.com/barryvdh/laravel-ide-helper) - IDE autocompletion
+1. Hapus layanan phpMyAdmin dan MailHog
+2. Gunakan environment variables untuk data sensitif
+3. Konfigurasi SSL certificate yang proper
+4. Setup logging dan monitoring yang proper
+5. Gunakan konfigurasi MySQL yang siap production
+6. Implementasikan strategi backup yang proper
 
-### 🔌 Extensions Recomended (VS Code)
+## 📝 Lisensi
 
-- **Docker** - Microsoft
-- **PHP Intelephense** - Ben Mewburn
-- **Laravel Blade Snippets** - Winnie Lin
-- **Laravel Artisan** - Ryan Naddy
-- **GitLens** - GitKraken
+Konfigurasi Docker ini bersifat open-source. Lisensi aplikasi Laravel Anda mungkin berbeda.
 
-## 🤝 Contributing & Support
+## 🤝 Kontribusi
 
-Kalau ada bug atau mau improve setup ini:
-
-1. Fork repo ini
-2. Bikin branch baru (`git checkout -b feature/improvement`)
-3. Commit changes (`git commit -m 'Add some improvement'`)
-4. Push ke branch (`git push origin feature/improvement`)
-5. Bikin Pull Request
-
-**🎉 Happy Coding!**
-
-Kalau setup ini membantu, jangan lupa kasih ⭐ ya!
+Silakan submit issues dan enhancement requests!
